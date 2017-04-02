@@ -1,3 +1,6 @@
+#ifndef IRIS_H
+#define IRIS_H
+
 #include<string>
 
 class Iris {
@@ -18,3 +21,5 @@ private:
   float petalWidth;
   int type;
 };
+
+#endif

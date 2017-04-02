@@ -6,28 +6,21 @@
 #include<vector>
 #include<cstdlib>
 #include"iris.h"
+#include"mlp.h"
 
 using namespace std;
 
-int main(){
-
-  cout << "Iris Classifier" << endl;
-
-  vector<Iris*> data;
-
-  // Reading file
-  cout << "Reading iris.data file..." << endl;
+void readFile(const string filePath, vector<Iris*> &data){
   ifstream dataFile;
-  dataFile.open("iris.data");
+  dataFile.open(filePath.c_str());
 
-  int counter = 0;
   while(!dataFile.eof()){
 
     // Reading new line and building stream
     string line;
 
     if(!getline(dataFile, line))
-      break; // avoid empty lines
+      break; // avoid empty lines at the end
     stringstream lineStream(line);
 
     // Reading each cell
@@ -45,15 +38,36 @@ int main(){
 
     // Building object and pushing it to vector
     data.push_back(new Iris(sepalLength, sepalWidth, petalLength, petalWidth, typeName));
-
-    ++counter;
   }
 
-  cout << "There are " << counter << " instances for training" << endl;
+  dataFile.close();
+
+}
+
+int main(){
+
+  cout << "Iris Classifier" << endl;
+
+  vector<Iris*> trainingData;
+  vector<Iris*> testingData;
+
+  // Reading file with training values
+  cout << "Reading iris-training.data file..." << endl;
+
+  readFile("dataset/iris-training.data", trainingData);
+
+  cout << ">> There are " << trainingData.size() << " instances for training" << endl;
+
+  // Reading file with testing values
+  cout << "Reading iris-testing.data file..." << endl;
+
+  readFile("dataset/iris-testing.data", testingData);
+
+  cout << ">> There are " << testingData.size() << " instances for testing" << endl;
 
   /*
   // Test
-  for (Iris * iris : data) {
+  for (Iris * iris : training) {
     cout << std::setprecision(2) << std::fixed << iris->getSepalLength();
     cout << " , ";
     cout << std::setprecision(2) << std::fixed << iris->getSepalWidth();
@@ -67,6 +81,9 @@ int main(){
   */
 
   // Run MLP
+  MLP mlp;
+  mlp.train(trainingData);
+
 
   return 0;
 }
