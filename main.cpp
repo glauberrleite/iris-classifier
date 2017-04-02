@@ -20,7 +20,7 @@ int main(){
   ifstream dataFile;
   dataFile.open("iris.data");
 
-  int counter;
+  int counter = 0;
   while(!dataFile.eof()){
 
     // Reading new line and building stream
@@ -49,7 +49,7 @@ int main(){
     ++counter;
   }
 
-  cout << "We have " << counter << " instances for training" << endl;
+  cout << "There are " << counter << " instances for training" << endl;
 
   /*
   // Test
