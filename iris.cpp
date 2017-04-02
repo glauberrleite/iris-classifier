@@ -19,12 +19,13 @@ Iris::Iris(float sepalLength, float sepalWidth, float petalLength, float petalWi
   init(sepalLength, sepalWidth, petalLength, petalWidth);
 
   // By default, we have Iris-setosa
-  type = 0;
+  this->type = 0;
 
-  if (typeName == "Iris-versicolor")
-    type = 1;
-  else if (typeName == "Iris-virginica")
-    type = 2;
+  // We need to be aware of windows carriage return
+  if (typeName == "Iris-versicolor" || typeName == "Iris-versicolor\r")
+    this->type = 1;
+  else if (typeName == "Iris-virginica" || typeName== "Iris-virginica\r")
+    this->type = 2;
 }
 
 float Iris::getSepalLength(){

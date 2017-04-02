@@ -65,9 +65,9 @@ int main(){
 
   cout << ">> There are " << testingData.size() << " instances for testing" << endl;
 
-  /*
+/*
   // Test
-  for (Iris * iris : training) {
+  for (Iris * iris : trainingData) {
     cout << std::setprecision(2) << std::fixed << iris->getSepalLength();
     cout << " , ";
     cout << std::setprecision(2) << std::fixed << iris->getSepalWidth();
@@ -78,12 +78,34 @@ int main(){
     cout << " , ";
     cout << iris->getType() << endl;
   }
-  */
+*/
 
   // Run MLP
   MLP mlp;
+
+  cout << "Training MLP..." << endl;
   mlp.train(trainingData);
 
+  cout << "Testing" << endl;
+  int counter = 1;
+  for (Iris* iris : testingData) {
+    int estimative = mlp.classificate(iris->getSepalLength(), iris->getSepalWidth(),
+    iris->getPetalLength(), iris->getPetalWidth());
+
+    cout << "Test " << counter << ": ";
+    cout << "Estimative -> " << estimative << " ";
+    cout << "Data -> " << iris->getType() << " ";
+
+    if (estimative == iris->getType()) {
+      cout << "(OK)";
+    } else {
+      cout << "(FAIL)";
+    }
+
+    cout << endl;
+
+    counter++;
+  }
 
   return 0;
 }
