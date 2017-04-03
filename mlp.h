@@ -18,6 +18,7 @@ private:
   std::vector<float> outputs;
   float *** weights;
   float sigmoid(float x);
+  float derivative_sigmoid(float x);
 };
 
 #endif

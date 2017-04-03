@@ -6,6 +6,10 @@ float MLP::sigmoid(float x) {
   return 1/(1 + exp(-x));
 }
 
+float MLP::derivative_sigmoid(float x) {
+  return exp(x)/pow((1 + exp(x)), 2);
+}
+
 MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, int numberOfClasses) {
   this->numberOfHiddenLayers = numberOfHiddenLayers;
   this->numberOfHiddenNeurons = numberOfHiddenNeurons;
@@ -120,9 +124,43 @@ void MLP::train(const std::vector<Iris*> &data){
     buildNetwork(iris->getSepalLength(), iris->getSepalWidth(),
       iris->getPetalLength(), iris->getPetalWidth());
 
+    // propagation starts by output
     for (int i = 0; i < outputs.size(); i++) {
-
+      if (i != iris->getType()) {
+         outputDelta[i] = (-1) * outputs[i] * derivative_sigmoid(outputs[i]);
+         error += pow(outputs[i], 2);
+      } else {
+        outputDelta[i] = (1 - outputs[i]) * derivative_sigmoid(outputs[i]);
+        error += pow(1 - outputs[i], 2);
+      }
     }
+
+    // propagation goes through the last hiddenLayer
+    for (int i = 0; i < numberOfHiddenNeurons; i++) {
+      hiddenDelta[numberOfHiddenLayers - 1][i] = 0;
+
+      for (int j = 0; j < outputs.size(); j++) {
+          hiddenDelta[numberOfHiddenLayers - 1][i] += outputDelta[j] * weights[numberOfHiddenLayers][i][j];
+      }
+
+      hiddenDelta[numberOfHiddenLayers - 1][i] *= derivative_sigmoid(hiddenNeurons[numberOfHiddenLayers - 1][i])
+    }
+
+    // propagation through layer to layer
+    for (int i = numberOfHiddenLayers - 1; i > 0; i--) {
+      for (int j = 0; j < numberOfHiddenNeurons; j++) {
+        hiddenDelta[i][j] = 0;
+
+        for (int k = 0; k < numberOfHiddenNeurons; k++) {
+          hiddenDelta[i][j] += hiddenDelta[i + 1][k] * weights[i + 1][j][k];
+        }
+
+        hiddenDelta[i][j] *= derivative_sigmoid(hiddenNeurons[i][j]);
+      }
+    }
+
+    
+
   }
 }
 
