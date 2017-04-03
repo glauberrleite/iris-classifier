@@ -11,6 +11,7 @@ public:
   void train(const std::vector<Iris*> &data);
   int classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth);
 private:
+  void buildNetwork(float sepalLength, float sepalWidth, float petalLength, float petalWidth);
   int numberOfHiddenLayers;
   int numberOfHiddenNeurons;
   float ** hiddenNeurons;

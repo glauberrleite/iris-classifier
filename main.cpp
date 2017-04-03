@@ -81,7 +81,7 @@ int main(){
 */
 
   // Run MLP
-  MLP mlp(1);
+  MLP mlp(1, 4, 3);
 
   cout << "Training MLP..." << endl;
   mlp.train(trainingData);
@@ -90,7 +90,7 @@ int main(){
   int counter = 1;
   for (Iris* iris : testingData) {
     int estimative = mlp.classificate(iris->getSepalLength(), iris->getSepalWidth(),
-    iris->getPetalLength(), iris->getPetalWidth());
+      iris->getPetalLength(), iris->getPetalWidth());
 
     cout << "Test " << counter << ": ";
     cout << "Estimative -> " << estimative << " ";

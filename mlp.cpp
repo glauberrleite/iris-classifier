@@ -67,59 +67,73 @@ MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, int numberOfClasse
 
 }
 
-int MLP::classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth) {
+void MLP::buildNetwork(float sepalLength, float sepalWidth, float petalLength, float petalWidth) {
   // For the first layer
   for (int j = 0; j < this->numberOfHiddenNeurons; j++) {
-    hiddenNeurons[0][j] = 0;
+    this->hiddenNeurons[0][j] = 0;
 
     // Calculating first layer neuron weights, we know how much inputs we have
-    hiddenNeurons[0][j] += sepalLength * weights[0][j][0];
-    hiddenNeurons[0][j] += sepalWidth * weights[0][j][1];
-    hiddenNeurons[0][j] += petalLength * weights[0][j][2];
-    hiddenNeurons[0][j] += petalWidth * weights[0][j][3];
+    this->hiddenNeurons[0][j] += sepalLength * this->weights[0][j][0];
+    this->hiddenNeurons[0][j] += sepalWidth * this->weights[0][j][1];
+    this->hiddenNeurons[0][j] += petalLength * this->weights[0][j][2];
+    this->hiddenNeurons[0][j] += petalWidth * this->weights[0][j][3];
 
     // Passing to the activation function, in this case, the logistic function
-    hiddenNeurons[0][j] = sigmoid(hiddenNeurons[0][j]);
+    this->hiddenNeurons[0][j] = sigmoid(this->hiddenNeurons[0][j]);
   }
 
   // For extra layers, if there's any
   for (int i = 1; i < this->numberOfHiddenLayers; i++) {
     for (int j = 0; j < this->numberOfHiddenNeurons; j++) {
-      hiddenNeurons[i][j] = 0;
+      this->hiddenNeurons[i][j] = 0;
 
       // This time, each k-th neuron from the antecessor layer (i -1) is a input
       for (int k = 0; k < this->numberOfHiddenNeurons; k++)
-        hiddenNeurons[i][j] += hiddenNeurons[i-1][k] * weights[i - 1][j][k];
+        this->hiddenNeurons[i][j] += this->hiddenNeurons[i-1][k] * this->weights[i - 1][j][k];
 
       // Passing to the activation function, in this case, the logistic function
-      hiddenNeurons[i][j] = sigmoid(hiddenNeurons[i][j]);
+      this->hiddenNeurons[i][j] = sigmoid(this->hiddenNeurons[i][j]);
     }
   }
 
-  // Now, the output vector gets the last hidden neurons as input, and the max value is held
-  int max = 0;
-  int result = 0;
-  for (int i = 0; i < outputs.size(); i++){
-    outputs[i] = 0;
+  // Now, the output vector gets the last hidden neurons as input
+  for (int i = 0; i < this->outputs.size(); i++){
+    this->outputs[i] = 0;
 
-    for (int j = 0; j < numberOfHiddenNeurons; j++){
-      outputs[i] = hiddenNeurons[numberOfHiddenLayers][j] * weights[numberOfHiddenLayers][i][j];
+    for (int j = 0; j < this->numberOfHiddenNeurons; j++){
+      this->outputs[i] += this->hiddenNeurons[this->numberOfHiddenLayers][j] * this->weights[this->numberOfHiddenLayers][i][j];
     }
 
-    outputs[i] = sigmoid(outputs[i]);
-
-    if(outputs[i] > max)
-      result = i;
+    this->outputs[i] = sigmoid(this->outputs[i]);
   }
-
-  return result;
-
 }
 
 void MLP::train(const std::vector<Iris*> &data){
   int epoch = 1;
 
+  float outputDelta[this->outputs.size()];
+  float hiddenDelta[this->numberOfHiddenLayers][this->numberOfHiddenNeurons];
+  float error = 0.0;
+
   for (Iris * iris : data){
-    //training
+
+    buildNetwork(iris->getSepalLength(), iris->getSepalWidth(),
+      iris->getPetalLength(), iris->getPetalWidth());
+
+    for (int i = 0; i < outputs.size(); i++) {
+
+    }
   }
+}
+
+int MLP::classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth){
+  buildNetwork(sepalLength, sepalWidth, petalLength, petalWidth);
+  int max = 0;
+  int result = 0;
+
+  for (int i = 0; i < this->outputs.size(); i++)
+    if(this->outputs[i] > max)
+      result = i;
+
+  return result;
 }
