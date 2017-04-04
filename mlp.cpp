@@ -44,7 +44,7 @@ MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, float learningRate
     this->weights[0][j] = new float[4];
 
     for (int k = 0; k < 4; ++k)
-      this->weights[0][j][k] = dist(randomGenerator);
+      this->weights[0][j][k] = ((float) dist(randomGenerator))/100;
   }
 
 
@@ -56,7 +56,7 @@ MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, float learningRate
       this->weights[i][j] = new float[numberOfHiddenNeurons];
 
       for (int k = 0; k < numberOfHiddenNeurons; ++k)
-        this->weights[i][j][k] = dist(randomGenerator);
+        this->weights[i][j][k] = ((float) dist(randomGenerator))/100;
     }
   }
 
@@ -66,7 +66,7 @@ MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, float learningRate
     this->weights[numberOfHiddenLayers + 1][j] = new float[numberOfHiddenNeurons];
 
     for(int k = 0; k < numberOfHiddenNeurons; ++k)
-      this->weights[numberOfHiddenLayers + 1][j][k] = dist(randomGenerator);;
+      this->weights[numberOfHiddenLayers + 1][j][k] = ((float) dist(randomGenerator))/100;
 
   }
 
@@ -90,7 +90,7 @@ void MLP::buildNetwork(float sepalLength, float sepalWidth, float petalLength, f
   }
 
   // For extra layers, if there's any
-  for (int i = 1; i <= this->numberOfHiddenLayers; i++) {
+  for (int i = 1; i < this->numberOfHiddenLayers; i++) {
     for (int j = 0; j < this->numberOfHiddenNeurons; j++) {
       this->hiddenNeurons[i][j] = 0;
 
@@ -108,7 +108,7 @@ void MLP::buildNetwork(float sepalLength, float sepalWidth, float petalLength, f
     this->outputs[i] = 0;
 
     for (int j = 0; j < this->numberOfHiddenNeurons; j++){
-      this->outputs[i] += this->hiddenNeurons[this->numberOfHiddenLayers][j] * this->weights[this->numberOfHiddenLayers + 1][i][j];
+      this->outputs[i] += this->hiddenNeurons[this->numberOfHiddenLayers - 1][j] * this->weights[this->numberOfHiddenLayers][i][j];
     }
 
     this->outputs[i] = sigmoid(this->outputs[i]);
@@ -119,8 +119,16 @@ void MLP::train(const std::vector<Iris*> &data){
   float outputDelta[this->outputs.size()];
   float hiddenDelta[this->numberOfHiddenLayers][this->numberOfHiddenNeurons];
 
+  int counter = 0;
   for (Iris * iris : data){
-
+	counter++;
+	std::cout << "---------" << std::endl;
+	std::cout << "Training " << counter << std::endl;
+	
+	float totalError = 0.0;
+	float meanError = 0.0;
+	
+	do {
     int estimative = classificate(iris->getSepalLength(), iris->getSepalWidth(),
       iris->getPetalLength(), iris->getPetalWidth());
 
@@ -129,17 +137,20 @@ void MLP::train(const std::vector<Iris*> &data){
 
     // propagation starts by output
     for (int i = 0; i < outputs.size(); i++) {
+	float error = 0.0;
       if (i == iris->getType()) {
 
-        float error = (1 - outputs[i]);
+        error = (1 - outputs[i]);
         outputDelta[i] = error * derivative_sigmoid(outputs[i]);
 
       } else {
 
-        float error = (0 - outputs[i]);
+        error = (0 - outputs[i]);
         outputDelta[i] = error * derivative_sigmoid(outputs[i]);
 
       }
+
+      	totalError += pow(error, 2);
     }
 
     // propagation goes through the last hiddenLayer
@@ -176,18 +187,24 @@ void MLP::train(const std::vector<Iris*> &data){
     }
 
     // For the hidden layers weights
-    /*for (int i = 1; i <= numberOfHiddenLayers; i++) {
+    for (int i = 1; i <= numberOfHiddenLayers; i++) {
       for (int j = 0; j < numberOfHiddenNeurons; j++) {
         for (int k = 0; k < numberOfHiddenNeurons; k++)
           weights[i][j][k] += learningRate * hiddenDelta[i][j] * hiddenNeurons[i - 1][k];
       }
-    }*/
+    }
 
     // For the output layers
     for (int i = 0; i < outputs.size(); i++)
       for (int j = 0; j < numberOfHiddenNeurons; j++)
         weights[numberOfHiddenLayers + 1][i][j] += learningRate * outputDelta[i] * hiddenNeurons[numberOfHiddenLayers - 1][j];
 
+
+    	meanError = totalError/(outputs.size());
+	totalError = 0.0;
+
+	} while (meanError > 1);
+	
   }
 }
 
@@ -195,9 +212,10 @@ int MLP::classificate(float sepalLength, float sepalWidth, float petalLength, fl
   buildNetwork(sepalLength, sepalWidth, petalLength, petalWidth);
   int max = 0;
   int result = 0;
-
+	
+  std::cout << "------------" << std::endl;
   for (int i = 0; i < this->outputs.size(); i++){
-    std::cout << outputs[i] << std::endl;
+    std::cout << "output[" << i << "] = " << outputs[i] << std::endl;
     if(this->outputs[i] > max){
       max = this->outputs[i];
       result = i;
