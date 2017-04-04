@@ -46,24 +46,24 @@ void readFile(const string filePath, vector<Iris*> &data){
 
 int main(){
 
-  cout << "Iris Classifier" << endl;
+  cout << "Iris Classifier\n";
 
   vector<Iris*> trainingData;
   vector<Iris*> testingData;
 
   // Reading file with training values
-  cout << "Reading iris-training.data file..." << endl;
+  cout << "Reading iris-training.data file...\n";
 
   readFile("dataset/iris-training.data", trainingData);
 
-  cout << ">> There are " << trainingData.size() << " instances for training" << endl;
+  cout << ">> There are " << trainingData.size() << " instances for training\n";
 
   // Reading file with testing values
-  cout << "Reading iris-testing.data file..." << endl;
+  cout << "Reading iris-testing.data file...\n";
 
   readFile("dataset/iris-testing.data", testingData);
 
-  cout << ">> There are " << testingData.size() << " instances for testing" << endl;
+  cout << ">> There are " << testingData.size() << " instances for testing\n";
 
 /*
   // Test
