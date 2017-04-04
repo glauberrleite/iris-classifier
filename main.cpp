@@ -81,7 +81,7 @@ int main(){
 */
 
   // Run MLP
-  MLP mlp(1, 4, 3);
+  MLP mlp(1);
 
   cout << "Training MLP..." << endl;
   mlp.train(trainingData);
