@@ -1,6 +1,7 @@
 #include"mlp.h"
 #include<random>
 #include<algorithm>
+#include<cmath>
 #include<iostream>
 
 float MLP::sigmoid(float x) {
@@ -36,7 +37,7 @@ MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, float learningRate
 
 
   // Building weights matrix and filling it with random values
-  this->weights = new float**[numberOfHiddenLayers + 2];
+  this->weights = new float**[numberOfHiddenLayers + 1];
 
   // In the first layer we have 4 weights, for the four variables
   this->weights[0] = new float*[numberOfHiddenNeurons];
@@ -44,29 +45,29 @@ MLP::MLP(int numberOfHiddenLayers, int numberOfHiddenNeurons, float learningRate
     this->weights[0][j] = new float[4];
 
     for (int k = 0; k < 4; ++k)
-      this->weights[0][j][k] = ((float) dist(randomGenerator))/100;
+      this->weights[0][j][k] = ((float) dist(randomGenerator))/1000;
   }
 
 
   // The rest of the layers, except output, use the layer before as input
-  for (int i = 1; i <= numberOfHiddenLayers; ++i) {
+  for (int i = 1; i < numberOfHiddenLayers; ++i) {
     this->weights[i] = new float*[numberOfHiddenNeurons];
 
     for (int j = 0; j < numberOfHiddenNeurons; ++j){
       this->weights[i][j] = new float[numberOfHiddenNeurons];
 
       for (int k = 0; k < numberOfHiddenNeurons; ++k)
-        this->weights[i][j][k] = ((float) dist(randomGenerator))/100;
+        this->weights[i][j][k] = ((float) dist(randomGenerator))/1000;
     }
   }
 
   // The last layer is the layer of outputs
-  this->weights[numberOfHiddenLayers + 1] = new float*[outputs.size()];
+  this->weights[numberOfHiddenLayers] = new float*[outputs.size()];
   for (int j = 0; j < outputs.size(); ++j) {
-    this->weights[numberOfHiddenLayers + 1][j] = new float[numberOfHiddenNeurons];
+    this->weights[numberOfHiddenLayers][j] = new float[numberOfHiddenNeurons];
 
     for(int k = 0; k < numberOfHiddenNeurons; ++k)
-      this->weights[numberOfHiddenLayers + 1][j][k] = ((float) dist(randomGenerator))/100;
+      this->weights[numberOfHiddenLayers][j][k] = ((float) dist(randomGenerator))/1000;
 
   }
 
@@ -121,14 +122,10 @@ void MLP::train(const std::vector<Iris*> &data){
 
   int counter = 0;
   for (Iris * iris : data){
-	counter++;
-	std::cout << "---------" << std::endl;
-	std::cout << "Training " << counter << std::endl;
-	
-	float totalError = 0.0;
-	float meanError = 0.0;
-	
-	do {
+  	counter++;
+  	std::cout << "---------" << std::endl;
+  	std::cout << "Training " << counter << std::endl;
+
     int estimative = classificate(iris->getSepalLength(), iris->getSepalWidth(),
       iris->getPetalLength(), iris->getPetalWidth());
 
@@ -137,7 +134,7 @@ void MLP::train(const std::vector<Iris*> &data){
 
     // propagation starts by output
     for (int i = 0; i < outputs.size(); i++) {
-	float error = 0.0;
+	    float error = 0.0;
       if (i == iris->getType()) {
 
         error = (1 - outputs[i]);
@@ -149,8 +146,6 @@ void MLP::train(const std::vector<Iris*> &data){
         outputDelta[i] = error * derivative_sigmoid(outputs[i]);
 
       }
-
-      	totalError += pow(error, 2);
     }
 
     // propagation goes through the last hiddenLayer
@@ -165,7 +160,8 @@ void MLP::train(const std::vector<Iris*> &data){
     }
 
     // propagation through layer to layer
-    for (int i = numberOfHiddenLayers - 1; i >= 0; i--) {
+    for (int i = numberOfHiddenLayers - 2; i >= 0; i--) {
+
       for (int j = 0; j < numberOfHiddenNeurons; j++) {
         hiddenDelta[i][j] = 0;
 
@@ -187,24 +183,18 @@ void MLP::train(const std::vector<Iris*> &data){
     }
 
     // For the hidden layers weights
-    for (int i = 1; i <= numberOfHiddenLayers; i++) {
+    for (int i = 1; i < numberOfHiddenLayers; i++) {
       for (int j = 0; j < numberOfHiddenNeurons; j++) {
         for (int k = 0; k < numberOfHiddenNeurons; k++)
           weights[i][j][k] += learningRate * hiddenDelta[i][j] * hiddenNeurons[i - 1][k];
       }
     }
 
-    // For the output layers
+    // For the output layer
     for (int i = 0; i < outputs.size(); i++)
       for (int j = 0; j < numberOfHiddenNeurons; j++)
-        weights[numberOfHiddenLayers + 1][i][j] += learningRate * outputDelta[i] * hiddenNeurons[numberOfHiddenLayers - 1][j];
+        weights[numberOfHiddenLayers][i][j] += learningRate * outputDelta[i] * hiddenNeurons[numberOfHiddenLayers - 1][j];
 
-
-    	meanError = totalError/(outputs.size());
-	totalError = 0.0;
-
-	} while (meanError > 1);
-	
   }
 }
 
@@ -212,7 +202,7 @@ int MLP::classificate(float sepalLength, float sepalWidth, float petalLength, fl
   buildNetwork(sepalLength, sepalWidth, petalLength, petalWidth);
   int max = 0;
   int result = 0;
-	
+
   std::cout << "------------" << std::endl;
   for (int i = 0; i < this->outputs.size(); i++){
     std::cout << "output[" << i << "] = " << outputs[i] << std::endl;
