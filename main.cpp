@@ -6,7 +6,9 @@
 #include<vector>
 #include<cstdlib>
 #include"iris.h"
+#include"method.h"
 #include"mlp.h"
+#include"knn.h"
 
 using namespace std;
 
@@ -80,32 +82,70 @@ int main(){
   }
 */
 
-  // Run MLP
-  MLP mlp(2, 4, 0.1);
+	Method method = M_KNN;
 
-  cout << "Training MLP..." << endl;
-  mlp.train(trainingData);
+  switch (method) {
+	  case M_MLP: {
+		  cout << "Using Multilayer Perceptron Algorithm" << endl;
+		  
+		  // Run MLP
+		  MLP mlp(2, 4, 0.1);
 
-  cout << "Testing" << endl;
-  int counter = 1;
-  for (Iris* iris : testingData) {
-    int estimative = mlp.classificate(iris->getSepalLength(), iris->getSepalWidth(),
-      iris->getPetalLength(), iris->getPetalWidth());
+		  cout << "Training MLP..." << endl;
+		  mlp.train(trainingData);
 
-    cout << "Test " << counter << ": ";
-    cout << "Estimative -> " << estimative << " ";
-    cout << "Data -> " << iris->getType() << " ";
+		  cout << "Testing" << endl;
+		  int counter = 1;
+		  for (Iris* iris : testingData) {
+			int estimative = mlp.classificate(iris->getSepalLength(), iris->getSepalWidth(),
+			  iris->getPetalLength(), iris->getPetalWidth());
 
-    if (estimative == iris->getType()) {
-      cout << "(OK)";
-    } else {
-      cout << "(FAIL)";
-    }
+			cout << "Test " << counter << ": ";
+			cout << "Estimative -> " << estimative << " ";
+			cout << "Data -> " << iris->getType() << " ";
 
-    cout << endl;
+			if (estimative == iris->getType()) {
+			  cout << "(OK)";
+			} else {
+			  cout << "(FAIL)";
+			}
 
-    counter++;
+			cout << endl;
+
+			counter++;
+		  }
+		  break;
+	  }
+	  case M_KNN: {
+		  cout << "Using K Nearest Neighbor" << endl;
+		  
+		  KNN knn(trainingData, 3);
+		  
+		  int counter = 1;
+		  
+		  for (Iris* iris : testingData) {
+			int estimative = knn.classificate(iris->getSepalLength(), iris->getSepalWidth(),
+			  iris->getPetalLength(), iris->getPetalWidth());
+			  
+			cout << "Test " << counter << ": ";
+			cout << "Estimative -> " << estimative << " ";
+			cout << "Data -> " << iris->getType() << " ";
+
+			if (estimative == iris->getType()) {
+			  cout << "(OK)";
+			} else {
+			  cout << "(FAIL)";
+			}
+
+			cout << endl;
+
+			counter++;
+		  }
+		  	  
+		  break;
+	  }
   }
+  
 
   return 0;
 }
