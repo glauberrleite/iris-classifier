@@ -5,13 +5,13 @@ KNN::KNN(const std::vector<Iris*> &trainingData, unsigned int k){
 	this->k = k;
 }
 
-int KNN:classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth){
+int KNN::classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth){
 	int nearestNeighbors[this->k][2];
 	
 	// Initializing nearestNeighbors
 	for (int i = 0; i < k; ++i) {
 		nearestNeighbors[i][0] = -1;
-		nearestNeighbors[i][1] = FLOAT_MAX;
+		nearestNeighbors[i][1] = 99999.9;
 	}
 	
 	
@@ -23,7 +23,10 @@ int KNN:classificate(float sepalLength, float sepalWidth, float petalLength, flo
 			float distance = sqrt(pow(diffSL, 2) + pow(diffSW, 2) + pow(diffPL, 2) + pow(diffPW, 2));
 			
 			for (int i = 0; i < k; ++i) {
-				
+				if (nearestNeighbors[i][0] == -1) {
+					nearestNeighbors[i][0] = sample->getType();
+					nearestNeighbors[i][1] = distance;
+				}
 			}
 	}
 	
