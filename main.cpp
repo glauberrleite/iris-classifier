@@ -1,14 +1,15 @@
-#include<iostream>
-#include<iomanip>
-#include<fstream>
-#include<sstream>
-#include<string>
-#include<vector>
-#include<cstdlib>
-#include"iris.h"
-#include"method.h"
-#include"mlp.h"
-#include"knn.h"
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include "iris.h"
+#include "supervised-learning.h"
+#include "method.h"
+#include "mlp.h"
+#include "knn.h"
 
 using namespace std;
 
@@ -67,85 +68,53 @@ int main(){
 
   cout << ">> There are " << testingData.size() << " instances for testing" << endl;
 
-/*
-  // Test
-  for (Iris * iris : trainingData) {
-    cout << std::setprecision(2) << std::fixed << iris->getSepalLength();
-    cout << " , ";
-    cout << std::setprecision(2) << std::fixed << iris->getSepalWidth();
-    cout << " , ";
-    cout << std::setprecision(2) << std::fixed << iris->getPetalLength();
-    cout << " , ";
-    cout << std::setprecision(2) << std::fixed << iris->getPetalWidth();
-    cout << " , ";
-    cout << iris->getType() << endl;
-  }
-*/
-
 	Method method = M_KNN;
+  SupervisedLearning * algorithm;
 
   switch (method) {
 	  case M_MLP: {
 		  cout << "Using Multilayer Perceptron Algorithm" << endl;
-		  
+
 		  // Run MLP
-		  MLP mlp(2, 4, 0.1);
+		  algorithm = new MLP(2, 4, 0.1);
 
 		  cout << "Training MLP..." << endl;
-		  mlp.train(trainingData);
+		  static_cast<MLP*>(algorithm)->train(trainingData);
 
-		  cout << "Testing" << endl;
-		  int counter = 1;
-		  for (Iris* iris : testingData) {
-			int estimative = mlp.classificate(iris->getSepalLength(), iris->getSepalWidth(),
-			  iris->getPetalLength(), iris->getPetalWidth());
-
-			cout << "Test " << counter << ": ";
-			cout << "Estimative -> " << estimative << " ";
-			cout << "Data -> " << iris->getType() << " ";
-
-			if (estimative == iris->getType()) {
-			  cout << "(OK)";
-			} else {
-			  cout << "(FAIL)";
-			}
-
-			cout << endl;
-
-			counter++;
-		  }
 		  break;
 	  }
 	  case M_KNN: {
 		  cout << "Using K Nearest Neighbor" << endl;
-		  
-		  KNN knn(trainingData, 3);
-		  
-		  int counter = 1;
-		  
-		  for (Iris* iris : testingData) {
-			int estimative = knn.classificate(iris->getSepalLength(), iris->getSepalWidth(),
-			  iris->getPetalLength(), iris->getPetalWidth());
-			  
-			cout << "Test " << counter << ": ";
-			cout << "Estimative -> " << estimative << " ";
-			cout << "Data -> " << iris->getType() << " ";
+		  algorithm = new KNN(trainingData, 5);
 
-			if (estimative == iris->getType()) {
-			  cout << "(OK)";
-			} else {
-			  cout << "(FAIL)";
-			}
-
-			cout << endl;
-
-			counter++;
-		  }
-		  	  
-		  break;
+      break;
 	  }
   }
-  
+
+  cout << "Testing" << endl;
+
+  int counter = 1;
+
+  for (Iris* iris : testingData) {
+
+    int estimative = algorithm->classificate(iris->getSepalLength(), iris->getSepalWidth(),
+      iris->getPetalLength(), iris->getPetalWidth());
+
+    cout << "Test " << counter << ": ";
+    cout << "Estimative -> " << estimative << " ";
+    cout << "Data -> " << iris->getType() << " ";
+
+    if (estimative == iris->getType()) {
+      cout << "(OK)";
+    } else {
+      cout << "(FAIL)";
+    }
+
+    cout << endl;
+
+    counter++;
+  }
+
 
   return 0;
 }

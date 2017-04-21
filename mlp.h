@@ -1,11 +1,12 @@
 #ifndef MLP_H
 #define MLP_H
 
-#include"iris.h"
-#include<vector>
-#include<cmath>
+#include "iris.h"
+#include "supervised-learning.h"
+#include <vector>
+#include <cmath>
 
-class MLP {
+class MLP : public SupervisedLearning {
 public:
   MLP(int numberOfHiddenLayers = 1, int numberOfHiddenNeurons = 4, float learningRate = 0.1);
   void train(const std::vector<Iris*> &data);

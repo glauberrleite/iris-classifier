@@ -1,11 +1,12 @@
 #ifndef KNN_H
 #define KNN_H
 
-#include"iris.h"
-#include<vector>
-#include<cmath>
+#include "iris.h"
+#include "supervised-learning.h"
+#include <vector>
+#include <cmath>
 
-class KNN {
+class KNN : public SupervisedLearning {
 public:
 	KNN(const std::vector<Iris*> &trainingData, unsigned int k = 5);
 	int classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth);
