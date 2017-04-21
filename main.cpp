@@ -91,6 +91,14 @@ int main(){
 	  }
   }
 
+  // Initializing Confusion Matrix
+  int confMatrix[3][3];
+
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      confMatrix[i][j] = 0;
+
+  // Testing
   cout << "Testing" << endl;
 
   int counter = 1;
@@ -104,6 +112,8 @@ int main(){
     cout << "Estimative -> " << estimative << " ";
     cout << "Data -> " << iris->getType() << " ";
 
+    confMatrix[estimative][iris->getType()]++;
+
     if (estimative == iris->getType()) {
       cout << "(OK)";
     } else {
@@ -113,6 +123,29 @@ int main(){
     cout << endl;
 
     counter++;
+  }
+
+  // Writing confusion Matrix
+  cout << "Confusion Matrix" << endl;
+  cout << "|-----------|-------|-------|-------|" << endl;
+  cout << "|Est....Real|   0   |   1   |   2   |" << endl;
+  cout << "|-----------|-------|-------|-------|" << endl;
+
+  for (int i = 0; i < 3; i++) {
+      cout << "|     " + to_string(i) + "     |";
+
+      for (int j = 0; j < 3; j++) {
+          cout << "   " + to_string(confMatrix[i][j]) + "  ";
+
+          if ((confMatrix[i][j] / 10) == 0)
+            cout << " ";
+
+          cout << "|" ;
+      }
+
+      cout << endl;
+
+      cout << "|-----------|-------|-------|-------|" << endl;
   }
 
 
