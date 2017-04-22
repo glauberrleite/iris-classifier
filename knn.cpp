@@ -1,4 +1,4 @@
-#include"knn.h"
+#include "knn.h"
 
 int farest (int (*nearestNeighbors)[2], unsigned int k) {
 	for (int i = 0; i < k; i++) {
@@ -13,9 +13,50 @@ int farest (int (*nearestNeighbors)[2], unsigned int k) {
 	}
 }
 
-KNN::KNN(const std::vector<Iris*> &trainingData, unsigned int k){
+void KNN::findMaxMinAttributes() {
+	maxSepalLength = maxSepalWidth = maxPetalLength = maxPetalWidth = 0;
+	minSepalLength = minSepalWidth = minPetalLength = minPetalWidth = 99.9;
+
+	for (Iris * sample : this->trainingData) {
+		maxSepalLength = sample->getSepalLength() > maxSepalLength ? sample->getSepalLength() : maxSepalLength;
+		minSepalLength = sample->getSepalLength() < minSepalLength ? sample->getSepalLength() : minSepalLength;
+
+		maxSepalWidth = sample->getSepalWidth() > maxSepalWidth ? sample->getSepalWidth() : maxSepalWidth;
+		minSepalWidth = sample->getSepalWidth() < minSepalWidth ? sample->getSepalWidth() : minSepalWidth;
+
+		maxPetalLength = sample->getPetalLength() > maxPetalLength ? sample->getPetalLength() : maxPetalLength;
+		minPetalLength = sample->getPetalLength() < minPetalLength ? sample->getPetalLength() : minPetalLength;
+
+		maxPetalWidth = sample->getPetalWidth() > maxPetalWidth ? sample->getPetalWidth() : maxPetalWidth;
+		minPetalWidth = sample->getPetalWidth() < minPetalWidth ? sample->getPetalWidth() : minPetalWidth;
+	}
+}
+
+float KNN::normalize(float attribute, AttributeType type) {
+	float result = 0;
+
+	switch (type) {
+		case SL: result = (attribute - this->minSepalLength)/(this->maxSepalLength - this->minSepalLength);
+							break;
+		case SW: result = (attribute - this->minSepalWidth)/(this->maxSepalWidth - this->minSepalWidth);
+							break;
+		case PL: result = (attribute - this->minPetalLength)/(this->maxPetalLength - this->minPetalLength);
+							break;
+		case PW: result = (attribute - this->minPetalWidth)/(this->maxPetalWidth - this->minPetalWidth);
+							break;
+	}
+
+	return result;
+}
+
+KNN::KNN(const std::vector<Iris*> &trainingData, unsigned int k, bool normalization){
 	this->trainingData = trainingData;
 	this->k = k;
+
+	this->normalization = normalization;
+
+	if (normalization)
+		findMaxMinAttributes();
 }
 
 int KNN::classificate(float sepalLength, float sepalWidth, float petalLength, float petalWidth){
@@ -24,15 +65,23 @@ int KNN::classificate(float sepalLength, float sepalWidth, float petalLength, fl
 	// Initializing nearestNeighbors
 	for (int i = 0; i < k; ++i) {
 		nearestNeighbors[i][0] = -1;
-		nearestNeighbors[i][1] = 99999.9;
+		nearestNeighbors[i][1] = 99.9;
 	}
 
-	for (Iris * sample : trainingData) {
-			// Calculating distance from training sample to given sample
-			float diffSL = sample->getSepalLength() - sepalLength;
-			float diffSW = sample->getSepalWidth() - sepalWidth;
-			float diffPL = sample->getPetalLength() - petalLength;
-			float diffPW = sample->getPetalWidth() - petalWidth;
+	for (Iris * sample : this->trainingData) {
+			// Calculating distance from training sample to given values
+			float diffSL, diffSW, diffPL, diffPW;
+			if (normalization) {
+				diffSL = normalize(sample->getSepalLength(), AttributeType::SL) - normalize(sepalLength, AttributeType::SL);
+				diffSW = normalize(sample->getSepalWidth(), AttributeType::SW) - normalize(sepalWidth, AttributeType::SW);
+				diffPL = normalize(sample->getPetalLength(), AttributeType::PL) - normalize(petalLength, AttributeType::PL);
+				diffPW = normalize(sample->getPetalWidth(), AttributeType::PW) - normalize(petalWidth, AttributeType::PW);
+			} else {
+				diffSL = sample->getSepalLength() - sepalLength;
+				diffSW = sample->getSepalWidth() - sepalWidth;
+				diffPL = sample->getPetalLength() - petalLength;
+				diffPW = sample->getPetalWidth() - petalWidth;
+			}
 			float distance = sqrt(pow(diffSL, 2) + pow(diffSW, 2) + pow(diffPL, 2) + pow(diffPW, 2));
 
 			for (int i = 0; i < k; ++i) {

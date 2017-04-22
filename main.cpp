@@ -47,6 +47,21 @@ void readFile(const string filePath, vector<Iris*> &data){
 
 }
 
+Method getMethodChoice(){
+  cout << "1 - MLP" << endl;
+  cout << "2 - KNN" << endl;
+
+  int choice;
+  cin >> choice;
+
+  if (choice < 1 || choice > 2) {
+    cout << "Choose a valid option" << endl;
+    return getMethodChoice();
+  }
+
+  return static_cast<Method>(choice);
+}
+
 int main(){
 
   cout << "Iris Classifier" << endl;
@@ -68,7 +83,9 @@ int main(){
 
   cout << ">> There are " << testingData.size() << " instances for testing" << endl;
 
-	Method method = M_KNN;
+  cout << "Choose algorithm: " << endl;
+  Method method = getMethodChoice();
+
   SupervisedLearning * algorithm;
 
   switch (method) {
@@ -85,7 +102,29 @@ int main(){
 	  }
 	  case M_KNN: {
 		  cout << "Using K Nearest Neighbor" << endl;
-		  algorithm = new KNN(trainingData, 5);
+
+      int k = 0;
+      bool valid = false;
+      bool normalize;
+
+      while (!valid) {
+        cout << "Set k: ";
+        cin >> k;
+
+        if (k >= 1 && k <= trainingData.size()) {
+          valid = true;
+        } else {
+          cout << "Invalid k number!" << endl;
+          continue;
+        }
+
+        cout << "Normalize data [0/1]? ";
+        cin >> normalize;
+
+        normalize = normalize > 1 || normalize < 0 ? 1 : normalize;
+      }
+
+		  algorithm = new KNN(trainingData, k, normalize);
 
       break;
 	  }
@@ -102,6 +141,8 @@ int main(){
   cout << "Testing" << endl;
 
   int counter = 1;
+  int hitCounter;
+  hitCounter = 0;
 
   for (Iris* iris : testingData) {
 
@@ -116,6 +157,7 @@ int main(){
 
     if (estimative == iris->getType()) {
       cout << "(OK)";
+      hitCounter++;
     } else {
       cout << "(FAIL)";
     }
@@ -147,6 +189,10 @@ int main(){
 
       cout << "|-----------|-------|-------|-------|" << endl;
   }
+
+  float hitRate = (static_cast<float>(hitCounter) / testingData.size()) * 100;
+
+  cout << "Hit Rate: " << fixed << setprecision(2) << hitRate << "%" << endl;
 
 
   return 0;
