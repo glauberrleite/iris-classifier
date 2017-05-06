@@ -13,10 +13,11 @@
 
 using namespace std;
 
-void readFile(const string filePath, vector<Iris*> &data){
+vector<Iris*> readFile(const string filePath){
   ifstream dataFile;
   dataFile.open(filePath.c_str());
 
+  vector<Iris*> data;
   while(!dataFile.eof()){
 
     // Reading new line and building stream
@@ -45,6 +46,8 @@ void readFile(const string filePath, vector<Iris*> &data){
 
   dataFile.close();
 
+  return data;
+
 }
 
 Method getMethodChoice(){
@@ -72,14 +75,14 @@ int main(){
   // Reading file with training values
   cout << "Reading iris-training.data file..." << endl;
 
-  readFile("dataset/iris-training.data", trainingData);
+  trainingData = readFile("dataset/iris-training.data");
 
   cout << ">> There are " << trainingData.size() << " instances for training" << endl;
 
   // Reading file with testing values
   cout << "Reading iris-testing.data file..." << endl;
 
-  readFile("dataset/iris-testing.data", testingData);
+  testingData = readFile("dataset/iris-testing.data");
 
   cout << ">> There are " << testingData.size() << " instances for testing" << endl;
 
@@ -92,8 +95,22 @@ int main(){
 	  case M_MLP: {
 		  cout << "Using Multilayer Perceptron Algorithm" << endl;
 
-		  // Run MLP
-		  algorithm = new MLP(2, 4, 0.1);
+      // Getting parameters
+      int numberOfHiddenLayers;
+      int numberOfHiddenNeurons;
+      float learningRate;
+
+      cout << "Set the number of hidden layers [n > 0]: ";
+      cin >> numberOfHiddenLayers;
+
+      cout << "Set the number of hidden neurons for each layer [n > 0]: ";
+      cin >> numberOfHiddenNeurons;
+
+      cout << "Set the learning rate: ";
+      cin >> learningRate;
+
+		  // Creating MLP object
+		  algorithm = new MLP(numberOfHiddenLayers, numberOfHiddenNeurons, learningRate);
 
 		  cout << "Training MLP..." << endl;
 		  static_cast<MLP*>(algorithm)->train(trainingData);
@@ -101,14 +118,15 @@ int main(){
 		  break;
 	  }
 	  case M_KNN: {
-		  cout << "Using K Nearest Neighbor" << endl;
+		  cout << "Using K Nearest Neighbors" << endl;
 
+      // Getting parameters
       int k = 0;
       bool valid = false;
       bool normalize;
 
       while (!valid) {
-        cout << "Set k: ";
+        cout << "Set k [k > 0]: ";
         cin >> k;
 
         if (k >= 1 && k <= trainingData.size()) {
@@ -124,6 +142,7 @@ int main(){
         normalize = normalize > 1 || normalize < 0 ? 1 : normalize;
       }
 
+      // creating KNN object
 		  algorithm = new KNN(trainingData, k, normalize);
 
       break;
