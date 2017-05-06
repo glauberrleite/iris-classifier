@@ -1,4 +1,4 @@
-# iris-classifier
+# Iris Classifier
 An iris plant classification software based on Marchine Learning.It reads a Iris
 plant database and classificates entries based on some training in that database.
 My goal is that someone who is studying supervised learning could read or run
