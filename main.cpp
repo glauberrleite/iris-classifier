@@ -98,6 +98,7 @@ int main(){
       // Getting parameters
       int numberOfHiddenLayers;
       int numberOfHiddenNeurons;
+      int numberOfEpochs;
       float learningRate;
 
       cout << "Set the number of hidden layers [n > 0]: ";
@@ -106,14 +107,17 @@ int main(){
       cout << "Set the number of hidden neurons for each layer [n > 0]: ";
       cin >> numberOfHiddenNeurons;
 
-      cout << "Set the learning rate: ";
+      cout << "Set the learning rate [0 < n < 1]: ";
       cin >> learningRate;
+
+      cout << "Set the number of epochs [n > 0]: ";
+      cin >> numberOfEpochs;
 
 		  // Creating MLP object
 		  algorithm = new MLP(numberOfHiddenLayers, numberOfHiddenNeurons, learningRate);
 
 		  cout << "Training MLP..." << endl;
-		  static_cast<MLP*>(algorithm)->train(trainingData);
+		  static_cast<MLP*>(algorithm)->train(trainingData, numberOfEpochs);
 
 		  break;
 	  }

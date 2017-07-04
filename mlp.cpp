@@ -1,8 +1,8 @@
-#include"mlp.h"
-#include<random>
-#include<algorithm>
-#include<cmath>
-#include<iostream>
+#include "mlp.h"
+#include <random>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
 
 float MLP::sigmoid(float x) {
   return 1/(1 + exp(-x));
@@ -116,85 +116,88 @@ void MLP::buildNetwork(float sepalLength, float sepalWidth, float petalLength, f
   }
 }
 
-void MLP::train(const std::vector<Iris*> &data){
-  float outputDelta[this->outputs.size()];
-  float hiddenDelta[this->numberOfHiddenLayers][this->numberOfHiddenNeurons];
+void MLP::train(const std::vector<Iris*> &data, int numberOfEpochs){
 
-  int counter = 0;
-  for (Iris * iris : data){
-  	counter++;
-  	std::cout << "---------" << std::endl;
-  	std::cout << "Training " << counter << std::endl;
+  for (int epoch = 1; epoch <= numberOfEpochs; epoch++) {
+    float outputDelta[this->outputs.size()];
+    float hiddenDelta[this->numberOfHiddenLayers][this->numberOfHiddenNeurons];
 
-    int estimative = classificate(iris->getSepalLength(), iris->getSepalWidth(),
-      iris->getPetalLength(), iris->getPetalWidth());
+    int counter = 0;
+    for (Iris * iris : data) {
+    	counter++;
+    	std::cout << "---------" << std::endl;
+    	std::cout << "Training " << counter << std::endl;
 
-    if(estimative == iris->getType())
-      continue;
+      int estimative = classificate(iris->getSepalLength(), iris->getSepalWidth(),
+        iris->getPetalLength(), iris->getPetalWidth());
 
-    // propagation starts by output
-    for (int i = 0; i < outputs.size(); i++) {
-	    float error = 0.0;
-      if (i == iris->getType()) {
+      if(estimative == iris->getType())
+        continue;
 
-        error = (1 - outputs[i]);
-        outputDelta[i] = error * derivative_sigmoid(outputs[i]);
+      // propagation starts by output
+      for (int i = 0; i < outputs.size(); i++) {
+  	    float error = 0.0;
+        if (i == iris->getType()) {
 
-      } else {
+          error = (1 - outputs[i]);
+          outputDelta[i] = error * derivative_sigmoid(outputs[i]);
 
-        error = (0 - outputs[i]);
-        outputDelta[i] = error * derivative_sigmoid(outputs[i]);
+        } else {
 
-      }
-    }
+          error = (0 - outputs[i]);
+          outputDelta[i] = error * derivative_sigmoid(outputs[i]);
 
-    // propagation goes through the last hiddenLayer
-    for (int i = 0; i < numberOfHiddenNeurons; i++) {
-      hiddenDelta[numberOfHiddenLayers - 1][i] = 0;
-
-      for (int j = 0; j < outputs.size(); j++) {
-          hiddenDelta[numberOfHiddenLayers - 1][i] += outputDelta[j] * weights[numberOfHiddenLayers][j][i];
+        }
       }
 
-      hiddenDelta[numberOfHiddenLayers - 1][i] *= derivative_sigmoid(hiddenNeurons[numberOfHiddenLayers - 1][i]);
-    }
+      // propagation goes through the last hiddenLayer
+      for (int i = 0; i < numberOfHiddenNeurons; i++) {
+        hiddenDelta[numberOfHiddenLayers - 1][i] = 0;
 
-    // propagation through layer to layer
-    for (int i = numberOfHiddenLayers - 2; i >= 0; i--) {
-
-      for (int j = 0; j < numberOfHiddenNeurons; j++) {
-        hiddenDelta[i][j] = 0;
-
-        for (int k = 0; k < numberOfHiddenNeurons; k++) {
-          hiddenDelta[i][j] += hiddenDelta[i + 1][k] * weights[i + 1][k][j];
+        for (int j = 0; j < outputs.size(); j++) {
+            hiddenDelta[numberOfHiddenLayers - 1][i] += outputDelta[j] * weights[numberOfHiddenLayers][j][i];
         }
 
-        hiddenDelta[i][j] *= derivative_sigmoid(hiddenNeurons[i][j]);
+        hiddenDelta[numberOfHiddenLayers - 1][i] *= derivative_sigmoid(hiddenNeurons[numberOfHiddenLayers - 1][i]);
       }
-    }
 
-    // Weight adjustment
-    // Starting from the inputs
-    for (int j = 0; j < numberOfHiddenNeurons; j++) {
-      weights[0][j][0] += learningRate * hiddenDelta[0][j] * iris->getSepalLength();
-      weights[0][j][1] += learningRate * hiddenDelta[0][j] * iris->getSepalWidth();
-      weights[0][j][2] += learningRate * hiddenDelta[0][j] * iris->getPetalLength();
-      weights[0][j][3] += learningRate * hiddenDelta[0][j] * iris->getPetalWidth();
-    }
+      // propagation through layer to layer
+      for (int i = numberOfHiddenLayers - 2; i >= 0; i--) {
 
-    // For the hidden layers weights
-    for (int i = 1; i < numberOfHiddenLayers; i++) {
+        for (int j = 0; j < numberOfHiddenNeurons; j++) {
+          hiddenDelta[i][j] = 0;
+
+          for (int k = 0; k < numberOfHiddenNeurons; k++) {
+            hiddenDelta[i][j] += hiddenDelta[i + 1][k] * weights[i + 1][k][j];
+          }
+
+          hiddenDelta[i][j] *= derivative_sigmoid(hiddenNeurons[i][j]);
+        }
+      }
+
+      // Weight adjustment
+      // Starting from the inputs
       for (int j = 0; j < numberOfHiddenNeurons; j++) {
-        for (int k = 0; k < numberOfHiddenNeurons; k++)
-          weights[i][j][k] += learningRate * hiddenDelta[i][j] * hiddenNeurons[i - 1][k];
+        weights[0][j][0] += learningRate * hiddenDelta[0][j] * iris->getSepalLength();
+        weights[0][j][1] += learningRate * hiddenDelta[0][j] * iris->getSepalWidth();
+        weights[0][j][2] += learningRate * hiddenDelta[0][j] * iris->getPetalLength();
+        weights[0][j][3] += learningRate * hiddenDelta[0][j] * iris->getPetalWidth();
       }
+
+      // For the hidden layers weights
+      for (int i = 1; i < numberOfHiddenLayers; i++) {
+        for (int j = 0; j < numberOfHiddenNeurons; j++) {
+          for (int k = 0; k < numberOfHiddenNeurons; k++)
+            weights[i][j][k] += learningRate * hiddenDelta[i][j] * hiddenNeurons[i - 1][k];
+        }
+      }
+
+      // For the output layer
+      for (int i = 0; i < outputs.size(); i++)
+        for (int j = 0; j < numberOfHiddenNeurons; j++)
+          weights[numberOfHiddenLayers][i][j] += learningRate * outputDelta[i] * hiddenNeurons[numberOfHiddenLayers - 1][j];
+
     }
-
-    // For the output layer
-    for (int i = 0; i < outputs.size(); i++)
-      for (int j = 0; j < numberOfHiddenNeurons; j++)
-        weights[numberOfHiddenLayers][i][j] += learningRate * outputDelta[i] * hiddenNeurons[numberOfHiddenLayers - 1][j];
-
   }
 }
 
